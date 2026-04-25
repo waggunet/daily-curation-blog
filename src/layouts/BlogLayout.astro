@@ -1,0 +1,38 @@
+---
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title = "Daily Curation Blog", description = "Daily tech news curation blog" } = Astro.props;
+---
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>{title}</title>
+  <meta name="description" content={description} />
+  <link rel="stylesheet" href="/src/styles/global.css" />
+  <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+</head>
+<body>
+  <header>
+    <div class="container">
+      <a href="/" class="logo">🦞 <span>Daily Curation</span></a>
+      <nav class="nav">
+        <a href="/">아카이브</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <slot />
+  </main>
+
+  <footer>
+    <div class="container">
+      <p>🦞 Daily Curation Blog · 매일 오후 6시 자동 업데이트</p>
+    </div>
+  </footer>
+</body>
+</html>

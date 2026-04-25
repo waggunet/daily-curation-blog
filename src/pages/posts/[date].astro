@@ -1,0 +1,142 @@
+---
+import BlogLayout from '../../layouts/BlogLayout.astro';
+import fs from 'node:fs';
+
+export async function getStaticPaths() {
+  const dataDir = new URL('../../data', import.meta.url);
+  if (!fs.existsSync(dataDir)) return [];
+  const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.json'));
+  return files.map(file => ({ params: { date: file.replace('.json', '') } }));
+}
+
+const { date } = Astro.params;
+const dataPath = new URL(`../../data/${date}.json`, import.meta.url);
+
+if (!fs.existsSync(dataPath)) {
+  return Astro.redirect('/');
+}
+
+const data = JSON.parse(fs.readFileSync(dataPath, 'utf-8'));
+
+const displayDate = `${date!.slice(0,4)}년 ${date!.slice(4,6)}월 ${date!.slice(6,8)}일`;
+---
+<BlogLayout title={`${displayDate} — Daily Curation`} description={data.summary}>
+  <div class="container">
+    <a href="/" class="back-link">← 아카이브</a>
+
+    <div class="post-header">
+      <div class="date">{displayDate}</div>
+      <h1>📰 Daily Curation</h1>
+      <div class="stats">
+        <span class="stat"><b>{data.articles?.length || 0}</b> 기사</span>
+        <span class="stat"><b>{data.trends?.length || 0}</b> 트렌드</span>
+        <span class="stat"><b>{data.insights?.length || 0}</b> 인사이트</span>
+        <span class="stat"><b>{data.action_items?.length || 0}</b> 액션</span>
+      </div>
+    </div>
+
+    {data.summary && (
+      <div class="summary-banner">{data.summary}</div>
+    )}
+
+    {data.trends && data.trends.length > 0 && (
+      <section>
+        <h2>🔥 트렌드</h2>
+        <div class="trend-grid">
+          {data.trends.map((t: any) => (
+            <div class={`trend-card ${t.impact}`}>
+              <div class="trend-title">{t.title}</div>
+              <div class="trend-desc">{t.description}</div>
+              <div class="trend-meta">
+                <span class={`impact-badge impact-${t.impact}`}>{t.impact}</span>
+                {t.sources?.map((s: string) => <span class="trend-source">{s}</span>)}
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {data.insights && data.insights.length > 0 && (
+      <section>
+        <h2>💡 인사이트</h2>
+        {data.insights.map((i: any) => (
+          <div class="insight-card">
+            <div class="insight-title">💡 {i.title}</div>
+            <div class="insight-content">{i.content}</div>
+            {i.trend_ref && <span class="trend-ref"># {i.trend_ref}</span>}
+          </div>
+        ))}
+      </section>
+    )}
+
+    {data.action_items && data.action_items.length > 0 && (
+      <section>
+        <h2>⚡ 액션 아이템</h2>
+        <div class="action-list">
+          {data.action_items.map((a: any) => (
+            <div class={`action-item ${a.priority}`}>
+              <div class="priority-dot"></div>
+              <div class="action-body">
+                <div class="action-title">{a.title}</div>
+                <div class="action-desc">{a.description}</div>
+                <div class="action-meta">
+                  <span class={`priority-label ${a.priority}`}>{a.priority}</span>
+                  <span class="effort-badge">⏱ {a.effort}</span>
+                  {a.trend_ref && <span class="trend-ref"># {a.trend_ref}</span>}
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    )}
+
+    {data.business_impact && (data.business_impact.opportunities?.length > 0 || data.business_impact.threats?.length > 0 || data.business_impact.recommendations?.length > 0) && (
+      <section>
+        <h2>📊 Business Impact</h2>
+        <div class="biz-grid">
+          {data.business_impact.opportunities?.length > 0 && (
+            <div class="biz-card opportunities">
+              <h3>🟢 기회</h3>
+              <ul class="biz-list">
+                {data.business_impact.opportunities.map((o: string) => <li set:html={o}></li>)}
+              </ul>
+            </div>
+          )}
+          {data.business_impact.threats?.length > 0 && (
+            <div class="biz-card threats">
+              <h3>🔴 위협</h3>
+              <ul class="biz-list">
+                {data.business_impact.threats.map((o: string) => <li set:html={o}></li>)}
+              </ul>
+            </div>
+          )}
+          {data.business_impact.recommendations?.length > 0 && (
+            <div class="biz-card recommendations">
+              <h3>🟠 권고사항</h3>
+              <ul class="biz-list">
+                {data.business_impact.recommendations.map((o: string) => <li set:html={o}></li>)}
+              </ul>
+            </div>
+          )}
+        </div>
+      </section>
+    )}
+
+    {data.articles && data.articles.length > 0 && (
+      <section>
+        <h2>📚 원문 기사 ({data.articles.length}건)</h2>
+        <div class="article-grid">
+          {data.articles.map((a: any) => (
+            <a href={a.link} class="article-card" target="_blank" rel="noopener">
+              <div class="source-tag">{a.source}</div>
+              <div class="article-title">{a.title}</div>
+              <div class="article-desc">{(a.description || '').replace(/<[^>]+>/g, '').slice(0, 150)}</div>
+            </a>
+          ))}
+        </div>
+      </section>
+    )}
+  </div>
+</BlogLayout>

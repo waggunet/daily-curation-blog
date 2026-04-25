@@ -1,17 +1,60 @@
 ---
+import BlogLayout from '../layouts/BlogLayout.astro';
+import fs from 'node:fs';
+import path from 'node:path';
 
+const dataDir = new URL('../../data', import.meta.url);
+let posts: any[] = [];
+
+if (fs.existsSync(dataDir)) {
+  const files = fs.readdirSync(dataDir)
+    .filter(f => f.endsWith('.json'))
+    .sort()
+    .reverse();
+
+  posts = files.map(file => {
+    const content = JSON.parse(fs.readFileSync(new URL(file, dataDir), 'utf-8'));
+    const date = file.replace('.json', '');
+    return {
+      date,
+      displayDate: `${date.slice(0,4)}년 ${date.slice(4,6)}월 ${date.slice(6,8)}일`,
+      summary: content.summary || '',
+      articleCount: content.articles?.length || 0,
+      trendCount: content.trends?.length || 0,
+      insightCount: (content.insights?.length || 0),
+      actionCount: (content.action_items?.length || 0),
+    };
+  });
+}
 ---
+<BlogLayout title="Daily Curation Blog — 아카이브">
+  <div class="container">
+    <div class="hero">
+      <h1>📰 Daily Curation</h1>
+      <p>매일 수집·분석하는 기술 뉴스 아카이브</p>
+    </div>
 
-<html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<link rel="icon" href="/favicon.ico" />
-		<meta name="viewport" content="width=device-width" />
-		<meta name="generator" content={Astro.generator} />
-		<title>Astro</title>
-	</head>
-	<body>
-		<h1>Astro</h1>
-	</body>
-</html>
+    <div class="post-list">
+      <h2>ALL POSTS ({posts.length})</h2>
+      {posts.length === 0 ? (
+        <div class="empty">
+          <p>아직 게시물이 없습니다.</p>
+          <p style="font-size:0.85rem;margin-top:0.5rem;">매일 오후 6시에 자동 게시됩니다.</p>
+        </div>
+      ) : (
+        posts.map(post => (
+          <a href={`/posts/${post.date}`} class="post-card">
+            <div class="date">{post.displayDate}</div>
+            <div class="title">{post.summary.split('.').slice(0, 2).join('.')}.</div>
+            <div class="summary">{post.summary}</div>
+            <div class="stats">
+              <span class="stat"><b>{post.articleCount}</b> 기사</span>
+              <span class="stat"><b>{post.trendCount}</b> 트렌드</span>
+              <span class="stat"><b>{post.actionCount}</b> 액션</span>
+            </div>
+          </a>
+        ))
+      )}
+    </div>
+  </div>
+</BlogLayout>
