@@ -3,14 +3,15 @@ import BlogLayout from '../../layouts/BlogLayout.astro';
 import fs from 'node:fs';
 
 export async function getStaticPaths() {
-  const dataDir = new URL('../../data', import.meta.url);
-  if (!fs.existsSync(dataDir)) return [];
-  const files = fs.readdirSync(dataDir).filter(f => f.endsWith('.json'));
+  const DATA_ROOT = '/Users/jorvis/daily-curation-blog/src/data';
+  if (!fs.existsSync(DATA_ROOT)) return [];
+  const files = fs.readdirSync(DATA_ROOT).filter(f => f.endsWith('.json'));
   return files.map(file => ({ params: { date: file.replace('.json', '') } }));
 }
 
+const DATA_ROOT = '/Users/jorvis/daily-curation-blog/src/data';
 const { date } = Astro.params;
-const dataPath = new URL(`../../data/${date}.json`, import.meta.url);
+const dataPath = `${DATA_ROOT}/${date}.json`;
 
 if (!fs.existsSync(dataPath)) {
   return Astro.redirect('/');
@@ -39,7 +40,7 @@ const displayDate = `${date!.slice(0,4)}년 ${date!.slice(4,6)}월 ${date!.slice
       <div class="summary-banner">{data.summary}</div>
     )}
 
-    {data.trends && data.trends.length > 0 && (
+    {data.trends?.length > 0 && (
       <section>
         <h2>🔥 트렌드</h2>
         <div class="trend-grid">
@@ -57,7 +58,7 @@ const displayDate = `${date!.slice(0,4)}년 ${date!.slice(4,6)}월 ${date!.slice
       </section>
     )}
 
-    {data.insights && data.insights.length > 0 && (
+    {data.insights?.length > 0 && (
       <section>
         <h2>💡 인사이트</h2>
         {data.insights.map((i: any) => (
@@ -70,7 +71,7 @@ const displayDate = `${date!.slice(0,4)}년 ${date!.slice(4,6)}월 ${date!.slice
       </section>
     )}
 
-    {data.action_items && data.action_items.length > 0 && (
+    {data.action_items?.length > 0 && (
       <section>
         <h2>⚡ 액션 아이템</h2>
         <div class="action-list">
@@ -124,7 +125,7 @@ const displayDate = `${date!.slice(0,4)}년 ${date!.slice(4,6)}월 ${date!.slice
       </section>
     )}
 
-    {data.articles && data.articles.length > 0 && (
+    {data.articles?.length > 0 && (
       <section>
         <h2>📚 원문 기사 ({data.articles.length}건)</h2>
         <div class="article-grid">

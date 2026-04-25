@@ -1,19 +1,18 @@
 ---
 import BlogLayout from '../layouts/BlogLayout.astro';
 import fs from 'node:fs';
-import path from 'node:path';
 
-const dataDir = new URL('../../data', import.meta.url);
+const DATA_ROOT = '/Users/jorvis/daily-curation-blog/src/data';
+
 let posts: any[] = [];
-
-if (fs.existsSync(dataDir)) {
-  const files = fs.readdirSync(dataDir)
+if (fs.existsSync(DATA_ROOT)) {
+  const files = fs.readdirSync(DATA_ROOT)
     .filter(f => f.endsWith('.json'))
     .sort()
     .reverse();
 
   posts = files.map(file => {
-    const content = JSON.parse(fs.readFileSync(new URL(file, dataDir), 'utf-8'));
+    const content = JSON.parse(fs.readFileSync(`${DATA_ROOT}/${file}`, 'utf-8'));
     const date = file.replace('.json', '');
     return {
       date,
