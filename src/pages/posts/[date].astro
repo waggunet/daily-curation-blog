@@ -2,16 +2,17 @@
 import BlogLayout from '../../layouts/BlogLayout.astro';
 import fs from 'node:fs';
 
+const DATA_DIR = `${process.cwd()}/public/data`;
+
 export async function getStaticPaths() {
-  const PUBLIC_DATA = '/Users/jorvis/daily-curation-blog/public/data';
-  if (!fs.existsSync(PUBLIC_DATA)) return [];
-  const files = fs.readdirSync(PUBLIC_DATA).filter(f => f.endsWith('.json'));
+  const dataPath = `${process.cwd()}/public/data`;
+  if (!fs.existsSync(dataPath)) return [];
+  const files = fs.readdirSync(dataPath).filter(f => f.endsWith('.json'));
   return files.map(file => ({ params: { date: file.replace('.json', '') } }));
 }
 
-const PUBLIC_DATA = '/Users/jorvis/daily-curation-blog/public/data';
 const { date } = Astro.params;
-const dataPath = `${PUBLIC_DATA}/${date}.json`;
+const dataPath = `${DATA_DIR}/${date}.json`;
 
 if (!fs.existsSync(dataPath)) {
   return Astro.redirect('/');
