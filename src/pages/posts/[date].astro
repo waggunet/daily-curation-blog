@@ -3,15 +3,15 @@ import BlogLayout from '../../layouts/BlogLayout.astro';
 import fs from 'node:fs';
 
 export async function getStaticPaths() {
-  const DATA_ROOT = '/Users/jorvis/daily-curation-blog/src/data';
-  if (!fs.existsSync(DATA_ROOT)) return [];
-  const files = fs.readdirSync(DATA_ROOT).filter(f => f.endsWith('.json'));
+  const PUBLIC_DATA = '/Users/jorvis/daily-curation-blog/public/data';
+  if (!fs.existsSync(PUBLIC_DATA)) return [];
+  const files = fs.readdirSync(PUBLIC_DATA).filter(f => f.endsWith('.json'));
   return files.map(file => ({ params: { date: file.replace('.json', '') } }));
 }
 
-const DATA_ROOT = '/Users/jorvis/daily-curation-blog/src/data';
+const PUBLIC_DATA = '/Users/jorvis/daily-curation-blog/public/data';
 const { date } = Astro.params;
-const dataPath = `${DATA_ROOT}/${date}.json`;
+const dataPath = `${PUBLIC_DATA}/${date}.json`;
 
 if (!fs.existsSync(dataPath)) {
   return Astro.redirect('/');
